@@ -1,0 +1,7 @@
+This application allows users to search for images on the Getty API (http://developers.gettyimages.com/en/trytheapi.html?) and search and save for their favorite photos. Users can see all of the possible images that have been searched (and the users that have saved the specific images) as well as their search history (by search term) and folders that they have created for each specific photos (they can save photos to various folders). Users can search for other users and see their search history. (Essentially something like Imgur except the users don't upload any photos.)
+
+Any photo that is clicked will link toward the original link
+
+Get request to new page: see all users that liked a photo
+Post request to same page: submit name => see search history
+Post request to new page: submit user's name => see all their folders
