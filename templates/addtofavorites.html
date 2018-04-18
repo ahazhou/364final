@@ -15,6 +15,9 @@
                 },
             success: function (data) { 
                 var returnstring = "Added to " + foldername.value.split('+')[0] + ".";
+                if (data == "exists"){
+                    returnstring = "Image already exists in " + foldername.value.split('+')[0] + ".";
+                }
                 var idname = "#" + foldername.value.split('+')[0]
                 console.log(idname)
                 $(idname).fadeIn(100)

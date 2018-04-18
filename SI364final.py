@@ -170,26 +170,39 @@ def gettyAPICall(phrase = "", imageID = ""):
         return r.json()
     return None
 
-def get_or_create_image(imageID):
+def get_or_create_image(imageID, search=False):
     image = Image.query.filter_by(imageID = imageID).first()
-    if image == None:
+    if image == None and search == False:
         image_information = gettyAPICall(imageID=imageID)
         image = Image(imageID=imageID, imageURL=image_information["images"][0]["display_sizes"][0]["uri"], sourceURL=image_information["images"][0]["referral_destinations"][0]["uri"])
         db.session.add(image)
         db.session.commit()
     return image
 
-def get_or_create_folder_collection(imageID, foldername):
+def get_or_create_folder_collection(foldername, imageID=0):
     current_user_id = User.query.filter_by(username=current_user.username).first().id
     current_user_folder = PersonalFolder.query.filter_by(name=foldername, user_id=current_user_id).first()
-    current_image = get_or_create_image(imageID)
-    if current_user_folder == None:#we have to create the folder so we directly add the image in
+    if current_user_folder == None:#we have to create the folder and we don't want to add the image directly because it's annoying
         current_user_folder = PersonalFolder(name=foldername, user_id=current_user_id)
+        db.session.add(current_user_folder)
+        db.session.commit()
+        return current_user_folder
     #otherwise if the folder already exists
+    current_image = get_or_create_image(imageID)
     current_user_folder.image.append(current_image)
     db.session.add(current_user_folder)
     db.session.commit()
     return current_user_folder
+
+def image_exists_in_folder(foldername, imageID):
+    current_user_id = User.query.filter_by(username=current_user.username).first().id
+    current_user_folder = PersonalFolder.query.filter_by(name=foldername, user_id=current_user_id).first()
+    current_image = get_or_create_image(imageID, search=True)
+    if current_user_folder == None:
+        return False
+    if current_user_folder.image.filter_by(id = current_image.id).first() == None:
+        return False
+    return True
 
 ########################
 ######## Routes ########
@@ -226,14 +239,12 @@ def foundimages():
 
 @app.route('/addtofavorites/<imageID>/<searchterm>', defaults={'foldername': None},methods=["GET","POST"])
 @app.route('/addtofavorites/<imageID>/<searchterm>/<foldername>',methods=["GET","POST"])
-#select and add to favorites folder
+#select and add to favorites folder (but only if it's a new folder)
 def addtofavorites(imageID, searchterm, foldername):
     form=FavoriteImageSubmit()
     create_folder_form=CreateNewFolder()
-    if form.validate_on_submit() and foldername != None:#post request if folder already exists
-        get_or_create_folder_collection(imageID, foldername)
     if create_folder_form.validate_on_submit() and create_folder_form.foldername.data != None:#post request if folder doesn't exist
-        get_or_create_folder_collection(imageID, create_folder_form.foldername.data)
+        get_or_create_folder_collection(create_folder_form.foldername.data)
     if imageID != None and searchterm != None:#when first land on this page
         if not current_user.is_authenticated:
             flash("Please log in.")
@@ -246,11 +257,16 @@ def addtofavorites(imageID, searchterm, foldername):
     return redirect(url_for('foundimages', searchterm=searchterm))
 
 @app.route('/api/addimgfolder')
-def add_img_to_folder():
-    if request.method == 'GET':
-        print(request.args.get("imageID"))
-        print(request.args.get("foldername"))
-    return ('', 204)
+#Add img to folder
+def add_img_to_folder():###TODO
+    if request.method == 'GET' and request.args.get("imageID") != None and request.args.get("foldername") != None:
+        cur_imageID = request.args.get("imageID")
+        cur_foldername = request.args.get("foldername")
+        if not image_exists_in_folder(cur_foldername, cur_imageID):
+            get_or_create_folder_collection(cur_foldername, cur_imageID)
+            return "success"
+        return "exists"
+    return ('', 500)
 
 @app.route('/register',methods=["GET","POST"])
 #register for username
