@@ -161,14 +161,11 @@ def get_or_create_image(imageID):
     return image
 
 def get_or_create_folder_collection(imageID, foldername):
-    current_user_id = User.query.filter_by(username=current_user).first()
-    current_user_folder = PersonalFolder.query.filter_by(name=foldername, user_id=current_user_id)
+    current_user_id = User.query.filter_by(username=current_user.username).first().id
+    current_user_folder = PersonalFolder.query.filter_by(name=foldername, user_id=current_user_id).first()
     current_image = get_or_create_image(imageID)
     if current_user_folder == None:#we have to create the folder so we directly add the image in
-        newfolder = PersonalFolder(name=foldername, user_id=current_user_id, image=current_image)
-        db.session.add(newfolder)
-        db.session.commit()
-        return newfolder
+        current_user_folder = PersonalFolder(name=foldername, user_id=current_user_id)
     #otherwise if the folder already exists
     current_user_folder.image.append(current_image)
     db.session.add(current_user_folder)
@@ -208,20 +205,24 @@ def foundimages():
     foundimages = gettyAPICall(phrase=searchterm)
     return render_template("foundimages.html", searchterm=searchterm, foundimages=foundimages, form=FavoriteImageSubmit())
 
-@app.route('/addtofavorites/<imageID>/<searchterm>', defaults={'foldername': None})
+@app.route('/addtofavorites/<imageID>/<searchterm>', defaults={'foldername': None},methods=["GET","POST"])
 @app.route('/addtofavorites/<imageID>/<searchterm>/<foldername>',methods=["GET","POST"])
 #select and add to favorites folder
 def addtofavorites(imageID, searchterm, foldername):
     form=FavoriteImageSubmit()
     create_folder_form=CreateNewFolder()
-    if form.validate_on_submit():#post request if folder already exists
+    print(create_folder_form.foldername.data)
+    if form.validate_on_submit() and foldername != None:#post request if folder already exists
         get_or_create_folder_collection(imageID, foldername)
-    if create_folder_form.validate_on_submit():#post request if folder doesn't exist
-        get_or_create_folder_collection(imageID, create_folder_form.foldername)
+    if create_folder_form.validate_on_submit() and create_folder_form.foldername.data != None:#post request if folder doesn't exist
+        get_or_create_folder_collection(imageID, create_folder_form.foldername.data)
     if imageID != None and searchterm != None:#when first land on this page
-        user_id = User.query.filter_by(username=current_user).first().id
+        if not current_user.is_authenticated:
+            flash("Please log in.")
+            return redirect(url_for("login"))
+        user_id = User.query.filter_by(username=current_user.username).first().id
         if user_id == None:
-            redirect(url_for("login"))#if you're not logged in, redirect
+            return redirect(url_for("register"))
         user_folders = PersonalFolder.query.filter_by(user_id=user_id).all()#get all the folder names
         ##################TODO (TESTING)
         return render_template("addtofavorites.html", imageID=imageID, user_folders=user_folders, form=form, create_folder_form=create_folder_form, searchterm=searchterm)
@@ -243,11 +244,11 @@ def register():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        current_user = User.query.filter_by(username=form.username.data).first()
-        if current_user == None:
+        user = User.query.filter_by(username=form.username.data).first()
+        if user == None:
             flash("No user found.")
-        elif current_user.verify_password(form.password.data):
-            login_user(current_user, form.loggedin.data)
+        elif user.verify_password(form.password.data):
+            login_user(user, form.loggedin.data)
             return redirect(url_for("index"))
     return render_template("login.html", form=form)
 
