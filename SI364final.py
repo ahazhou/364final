@@ -180,9 +180,6 @@ def get_or_create_searchterm(searchterm, username):
         username = "Anonymous"
     user_id = User.query.filter_by(username=username).first().id
     search = SearchHistory.query.filter_by(user_id=user_id, searchterm=searchterm).first()
-    print(user_id)
-    print(searchterm)
-    print("AHHHHHHHHHHHHHHHHHHHHHH\n\n\n\n")
     if search == None:
         search = SearchHistory(user_id=user_id, searchterm=searchterm)
         db.session.add(search)
@@ -198,7 +195,7 @@ def get_or_create_image(imageID, search=False):
         db.session.commit()
     return image
 
-def get_or_create_folder_collection(foldername, imageID=0):
+def get_or_create_folder_collection(foldername, imageID=-1):
     current_user_id = User.query.filter_by(username=current_user.username).first().id
     current_user_folder = PersonalFolder.query.filter_by(name=foldername, user_id=current_user_id).first()
     if current_user_folder == None:#we have to create the folder and we don't want to add the image directly because it's annoying
@@ -206,10 +203,16 @@ def get_or_create_folder_collection(foldername, imageID=0):
         db.session.add(current_user_folder)
         db.session.commit()
         return current_user_folder
+    if imageID == -1:
+        return None
     #otherwise if the folder already exists
     current_image = get_or_create_image(imageID)
+    #add image to current folder
     current_user_folder.image.append(current_image)
     db.session.add(current_user_folder)
+    #add to search history
+    imageSavedHistory = ImageSavedHistory(image_id=imageID)
+    db.session.add(imageSavedHistory)
     db.session.commit()
     return current_user_folder
 
