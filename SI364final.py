@@ -211,7 +211,6 @@ def foundimages():
 def addtofavorites(imageID, searchterm, foldername):
     form=FavoriteImageSubmit()
     create_folder_form=CreateNewFolder()
-    print(create_folder_form.foldername.data)
     if form.validate_on_submit() and foldername != None:#post request if folder already exists
         get_or_create_folder_collection(imageID, foldername)
     if create_folder_form.validate_on_submit() and create_folder_form.foldername.data != None:#post request if folder doesn't exist
@@ -224,9 +223,15 @@ def addtofavorites(imageID, searchterm, foldername):
         if user_id == None:
             return redirect(url_for("register"))
         user_folders = PersonalFolder.query.filter_by(user_id=user_id).all()#get all the folder names
-        ##################TODO (TESTING)
         return render_template("addtofavorites.html", imageID=imageID, user_folders=user_folders, form=form, create_folder_form=create_folder_form, searchterm=searchterm)
     return redirect(url_for('foundimages', searchterm=searchterm))
+
+@app.route('/api/addimgfolder')
+def add_img_to_folder():
+    if request.method == 'GET':
+        print(request.args.get("imageID"))
+        print(request.args.get("foldername"))
+    return ('', 204)
 
 @app.route('/register',methods=["GET","POST"])
 #register for username

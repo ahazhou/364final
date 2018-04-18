@@ -3,17 +3,52 @@
 {% block main_content %}
 <h1>Add to Favorites</h1>
 {% for folder in user_folders %}
-<h3>{{folder.name}}</h3>
-<form action="/addtofavorites/{{imageID}}/{{searchterm}}/{{folder.name}}" method="POST" class="form_display">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+<script type="text/javascript">
+    function add_to_folder(foldername){
+        $.ajax({
+            type: "GET",
+            url: "/api/addimgfolder",
+            contentType: "application/json; charset=utf-8",
+            data: {
+                foldername: foldername.value.split('+')[0],
+                imageID: foldername.value.split('+')[1]
+                },
+            success: function (data) { 
+                var returnstring = "Added to folder " + foldername.value.split('+')[0] + ".";
+                var idname = "#" + foldername.value.split('+')[0]
+                console.log(idname)
+                $(idname).html(returnstring)//WHY DOESN"T THIS SHOW IN THE STRING
+            },
+            error: function (xhf){
+                console.log(xhf)
+            }
+        });                
+    }
+</script>
+<style>
+textarea:focus, input:focus{
+    outline: none;
+    text-decoration: none;
+}
+</style>
+<div style="width:50px;height:50px;position:relative;">
+<input onclick="add_to_folder(this);" style="background:transparent;border:none;font-size:0;color:transparent;position:absolute;width:100%;height:100%;cursor:pointer;z-index:1;" value="{{folder.name}}+{{imageID}}">
+    <h3 style="margin:auto; left:50%;top:50%; transform:translate(-50%); position: absolute;">{{folder.name}}</h3>
+    <img src="https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678084-folder-512.png" style="width:50px;margin:0;">
+</input>
+</div>
+<div id="{{folder.name}}" style="margin:5px;"></div>
+<!--form action="/addtofavorites/{{imageID}}/{{searchterm}}/{{folder.name}}" method="POST" class="form_display">
     {{ form.hidden_tag() }}
-    {{ form.submit }}
-</form>
+    {{ form.submit() }}
+</form-->
 {% endfor %}
 <h3>Create New Folder</h3>
 <form action="/addtofavorites/{{imageID}}/{{searchterm}}" method="POST" class="form_display">
     {{ create_folder_form.hidden_tag() }}
     {{ create_folder_form.foldername }}
-    {{ create_folder_form.submit }}
+    {{ create_folder_form.submit() }}
 </form>
 {% endblock %}
 
