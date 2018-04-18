@@ -2,7 +2,6 @@
 
 {% block main_content %}
 <h1>Add to Favorites</h1>
-{% for folder in user_folders %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
 <script type="text/javascript">
     function add_to_folder(foldername){
@@ -15,10 +14,12 @@
                 imageID: foldername.value.split('+')[1]
                 },
             success: function (data) { 
-                var returnstring = "Added to folder " + foldername.value.split('+')[0] + ".";
+                var returnstring = "Added to " + foldername.value.split('+')[0] + ".";
                 var idname = "#" + foldername.value.split('+')[0]
                 console.log(idname)
-                $(idname).html(returnstring)//WHY DOESN"T THIS SHOW IN THE STRING
+                $(idname).fadeIn(100)
+                $(idname).html(returnstring)
+                $(idname).delay(700).fadeOut(400)
             },
             error: function (xhf){
                 console.log(xhf)
@@ -31,25 +32,40 @@ textarea:focus, input:focus{
     outline: none;
     text-decoration: none;
 }
+.wrapper:after {
+    content: '';
+    display: block;
+    clear: both;
+}
+.wrapper{
+    margin-bottom:200px;
+}
 </style>
-<div style="width:50px;height:50px;position:relative;">
-<input onclick="add_to_folder(this);" style="background:transparent;border:none;font-size:0;color:transparent;position:absolute;width:100%;height:100%;cursor:pointer;z-index:1;" value="{{folder.name}}+{{imageID}}">
-    <h3 style="margin:auto; left:50%;top:50%; transform:translate(-50%); position: absolute;">{{folder.name}}</h3>
-    <img src="https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678084-folder-512.png" style="width:50px;margin:0;">
-</input>
+{% if user_folders|length > 0 %}
+<div class="wrapper">
+    {% for folder in user_folders %}
+    <div style="float: left;">
+            <h3 id="{{folder.name}}" style="margin:5px;position:absolute;background:white;top:10px;left:250px;"></h3>
+            <div style="width:50px;height:50px;position:relative;margin: 5px 40px;">
+                <input onclick="add_to_folder(this);" style="background:transparent;border:none;font-size:0;color:transparent;position:absolute;width:100%;height:100%;cursor:pointer;z-index:1;" value="{{folder.name}}+{{imageID}}">
+                    <h3 style="margin:auto; left:50%;top:50%; transform:translate(-50%); position: absolute;">{{folder.name}}</h3>
+                    <img src="https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678084-folder-512.png" style="width:50px;margin:0;">
+                </input>
+            </div>
+    </div>
+    {% endfor %}
 </div>
-<div id="{{folder.name}}" style="margin:5px;"></div>
-<!--form action="/addtofavorites/{{imageID}}/{{searchterm}}/{{folder.name}}" method="POST" class="form_display">
-    {{ form.hidden_tag() }}
-    {{ form.submit() }}
-</form-->
-{% endfor %}
+{% endif %}
 <h3>Create New Folder</h3>
 <form action="/addtofavorites/{{imageID}}/{{searchterm}}" method="POST" class="form_display">
     {{ create_folder_form.hidden_tag() }}
     {{ create_folder_form.foldername }}
     {{ create_folder_form.submit() }}
 </form>
+
+{% for message in get_flashed_messages() %}
+<h3>{{ message }}</h3>
+{% endfor %}
 {% endblock %}
 
 {% block navigation %}

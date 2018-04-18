@@ -69,7 +69,7 @@ def load_user(user_id):
 class PersonalFolder(db.Model):
     __tablename__ = "personalfolders"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255))
+    name = db.Column(db.String(15))
     #one to many relationship with user model
     user_id = db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
     #many to many relationship with the images model
@@ -132,6 +132,25 @@ class FavoriteImageSubmit(FlaskForm):
 class CreateNewFolder(FlaskForm):
     foldername = StringField("Folder name:", validators=[Required()])
     submit = SubmitField("Create")
+    def validate(self):
+        rv = FlaskForm.validate(self)
+        if not rv:
+            return False
+
+        if len(self.foldername.data) > 15:
+            flash("Invalid name: " + self.foldername.data)
+            flash("Name can be at most 15 characters.")
+            return False
+
+        if self.foldername.data.find('#') != -1:
+            flash("Invalid name: " + self.foldername.data)
+            flash("Name cannot contain character '#'.")
+            return False
+        if self.foldername.data.find(' ') != -1:
+            flash("Invalid name: " + self.foldername.data)
+            flash("Name cannot contain spaces.")
+            return False
+        return True
 
 
 ########################
