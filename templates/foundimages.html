@@ -1,0 +1,43 @@
+{% extends 'index.html' %}
+
+{% block main_content %}
+<h1>Found Images</h1>
+<h3>Search term: <b>{{searchterm}}</b></h3>
+<br>
+<style>
+.wrapper:after {
+    content: '';
+    display: block;
+    clear: both;
+}
+.image_display{
+    margin: 0 auto;
+    display: flow-root;
+    max-height: 170px;
+}
+.form_display{
+    margin: 3%;
+}
+.form_display > input{
+    cursor: pointer;
+    margin: 0 auto;
+    display: flow-root;
+}
+</style>
+<div class="wrapper">
+{% for image in foundimages["images"][:50] %}
+    <div style="width: 30%; height: 250px; margin: 1.5%; float: left; position: relative;">
+        <h4 style="text-align: center;">{{image["title"]}}</h4>
+        <a href={{image["referral_destinations"][0]["uri"]}} target="_blank"><img src={{image["display_sizes"][0]["uri"]}} class="image_display"></a>
+        <form action="/addtofavorites/{{ image['id'] }}/{{searchterm}}" method="POST" class="form_display">
+            {{ form.hidden_tag() }}
+            {{ form.submit }}
+        </form>
+    </div>
+{% endfor %}
+</div>
+{% endblock %}
+
+{% block navigation %}
+    {{ super() }}
+{% endblock %}

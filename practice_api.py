@@ -18,16 +18,25 @@ def makerequesttoapi(phrase = "stuff"):
     r = requests.get(geturl, headers=headers)
     return r.json()
 
+def imageIDRequest(imageID):
+    headers = {
+        'Api-Key': api_key
+    }
+    geturl = 'https://api.gettyimages.com/v3/images/' + str(imageID) + '?fields=id,title,thumb,referral_destinations'
+    r = requests.get(geturl, headers=headers)
+    return r.json()
+
 def testroute():
     #for all of the function calls below, the term "pandas" can be replaced with any user term
     #access all values from search term
-    print(makerequesttoapi("pandas"))
-    print("\n\n\n")
+    #print(makerequesttoapi("pandas")["images"][0])
+    #print("\n\n\n")
     #get specific title
-    print(makerequesttoapi("pandas")["images"][0]["title"])
-    print("\n\n\n")
+    #print(makerequesttoapi("pandas")["images"][0]["title"])
+    #print("\n\n\n")
     #get specific information about the display for the images to be displayed properly
-    print(makerequesttoapi("pandas")["images"][0]["display_sizes"])
+    #print(makerequesttoapi("pandas")["images"][0]["display_sizes"][0]["uri"])
+    print(imageIDRequest(628802586)["images"][0]["referral_destinations"][0]["uri"])
 
 
 

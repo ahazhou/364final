@@ -1,0 +1,23 @@
+{% extends 'index.html' %}
+
+{% block main_content %}
+<h1>Add to Favorites</h1>
+{% for folder in user_folders %}
+<h3>{{folder.name}}</h3>
+<form action="/addtofavorites/{{imageID}}/{{searchterm}}/{{folder.name}}" method="POST" class="form_display">
+    {{ form.hidden_tag() }}
+    {{ form.submit }}
+</form>
+{% endfor %}
+<h3>Create New Folder</h3>
+<form action="/addtofavorites/{{imageID}}/{{searchterm}}" method="POST" class="form_display">
+    {{ create_folder_form.hidden_tag() }}
+    {{ create_folder_form.foldername }}
+    {{ create_folder_form.submit }}
+</form>
+{% endblock %}
+
+{% block navigation %}
+    {{ super() }}
+{% endblock %}
+

@@ -1,0 +1,28 @@
+{% block main_content %}
+<div style="width: 100%;margin: auto;">
+	<h1 style="text-align:center;">Getty Stock</h1>
+	{% if current_user.is_authenticated %}
+	<h3 style="text-align:center">Welcome {{current_user.username}}</h3>
+	{% endif %}
+</div>
+<form method="GET">
+	{{ form.hidden_tag() }}
+	{{ form.searchterm.label }} {{ form.searchterm() }}
+	{{ form.submit() }}
+</form>
+{% endblock %}
+
+{% block navigation %}
+<br>
+<h3 style="margin-bottom:0;">Navigation</h3>
+<p style="margin:0;">--------</p>
+<ul style="margin:0;">
+	{% if current_user.is_authenticated %}
+		<li><a href="{{ url_for('logout') }}">Sign Out {{current_user.username}}</a></li>
+	{% else %}
+		<li><a href="{{ url_for('login') }}">Sign In</a></li>
+	{% endif %}
+    <li><a href="{{ url_for('index') }}">Home</a></li>
+</ul>
+<p style="margin-top:0;">--------</p>
+{% endblock %}
