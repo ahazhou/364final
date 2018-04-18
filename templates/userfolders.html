@@ -1,0 +1,49 @@
+{% extends 'index.html' %}
+
+{% block main_content %}
+<h1>Folders for {{current_user.username}}</h1>
+<style>
+textarea:focus, input:focus{
+    outline: none;
+    text-decoration: none;
+}
+.wrapper:after {
+    content: '';
+    display: block;
+    clear: both;
+}
+.form_display{
+    margin: 3%;
+}
+.form_display > input{
+    cursor: pointer;
+    margin: 0 auto;
+    display: flow-root;
+}
+</style>
+{% if user_folders|length > 0 %}
+<div class="wrapper">
+    {% for folder in user_folders %}
+    <div style="float: left;">
+        <a href="{{url_for('open_folder', foldername=folder.name)}}" style="color:black;">
+            <div style="width:50px;height:50px;position:relative;margin: 5px 40px;">
+                <h3 style="margin:auto; left:50%;top:50%; transform:translate(-50%); position: absolute;">{{folder.name}}</h3>
+                <img src="https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678084-folder-512.png" style="width:50px;margin:0;">
+            </div>
+        </a>
+        <form action="/delete/folder/{{folder.name}}/{{folder.name}}" method="POST" class="form_display">
+            {{ form.hidden_tag() }}
+            {{ form.delete }}
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<h3>No Folders Found.</h3>
+{% endif %}
+{% endblock %}
+
+{% block navigation %}
+    {{ super() }}
+{% endblock %}
+

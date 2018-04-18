@@ -157,6 +157,8 @@ class CreateNewFolder(FlaskForm):
             return False
         return True
 
+class DeleteObject(FlaskForm):
+    delete = SubmitField("Delete")
 
 ########################
 ### Helper functions ###
@@ -255,7 +257,11 @@ def index():
 def foundimages():
     searchterm = ""
     if request.args.get("searchterm") != None:
-        get_or_create_searchterm(request.args.get("searchterm"), current_user.username)
+        if current_user.is_authenticated:
+            current_username = current_user.username
+        else:
+            current_username = "Anonymous"
+        get_or_create_searchterm(request.args.get("searchterm"), current_username)
         searchterm = request.args.get("searchterm")
     foundimages = gettyAPICall(phrase=searchterm)
     return render_template("foundimages.html", searchterm=searchterm, foundimages=foundimages, form=FavoriteImageSubmit())
@@ -279,7 +285,7 @@ def addtofavorites(imageID, searchterm, foldername):
         return render_template("addtofavorites.html", imageID=imageID, user_folders=user_folders, form=form, create_folder_form=create_folder_form, searchterm=searchterm)
     return redirect(url_for('foundimages', searchterm=searchterm))
 
-@app.route('/api/addimgfolder')
+@app.route('/api/addimgfolder',methods=["GET","POST"])
 #Add img to folder
 def add_img_to_folder():###TODO
     if request.method == 'GET' and request.args.get("imageID") != None and request.args.get("foldername") != None:
@@ -331,24 +337,59 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+@app.route('/userfolders')
+#define all folders for specific user (post request)
+def folders():
+    if not current_user.is_authenticated:
+        return ('', 204)
+    user_id = User.query.filter_by(username=current_user.username).first().id
+    if user_id == None:
+        return redirect(url_for("register"))
+    user_folders = PersonalFolder.query.filter_by(user_id=user_id).all()#get all the folder names
+    return render_template("userfolders.html", user_folders=user_folders, form=DeleteObject())
+
+@app.route('/folder',methods=["GET","POST"])
+#all search terms
+def open_folder():
+    if request.method == 'GET' and request.args.get("foldername") != None:
+        form = DeleteObject()
+        current_userID = User.query.filter_by(username=current_user.username).first().id
+        if current_userID == None:
+            current_userID = User.query.filter_by(username="Anonymous").first().id
+        folderImages = PersonalFolder.query.filter_by(name=request.args.get("foldername"), user_id=current_userID).first().image.all()
+        return render_template("folderImages.html", foldername=request.args.get("foldername"), folderImages=folderImages, form=form)
+    return ('', 204)
+
+@app.route('/delete/<objecttype>/<objectname>/<albumname>',methods=["GET","POST"])
+#delete either photo from album or delete album
+def delete_object(objecttype,objectname,albumname):
+    if objecttype != None and objectname != None and albumname != None:
+        current_userID = User.query.filter_by(username=current_user.username).first().id
+        if current_userID == None:
+            current_userID = User.query.filter_by(username="Anonymous").first().id
+
+        if objecttype == "folder":#delete entire folder
+            chosen_folder = PersonalFolder.query.filter_by(name=objectname, user_id=current_userID).first()
+            db.session.delete(chosen_folder)
+            db.session.commit()
+            return redirect(url_for('folders'))
+        elif objecttype == "image":#delete image from folder
+            user_images = PersonalFolder.query.filter_by(name=albumname, user_id=current_userID).first().image
+            current_image = user_images.filter_by(id=objectname).first()
+            db.session.delete(current_image)
+            db.session.commit()
+            return redirect(url_for('folders'))
+    return ('', 204)
+    
+
 @app.route('/liked/<image_id>')
 #all users who liked specific image (get request)
 def liked():
     pass
 
-@app.route('/userfolders')
-#define all folders for specific user (post request)
-def folders():
-    pass
-
 @app.route('/imagehistorysaved')
 #see all images saved
 def savedimages():
-    pass
-
-@app.route('/searchedtermhistory')
-#all search terms
-def searchhistory():
     pass
 
     

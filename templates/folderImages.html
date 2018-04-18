@@ -1,0 +1,49 @@
+{% extends 'index.html' %}
+
+{% block main_content %}
+<h1>Folder: {{foldername}}</h1>
+{% if folderImages == None %}
+<h3>Folder doesn't exist.</h3>
+{% else %}
+<style>
+.wrapper:after {
+    content: '';
+    display: block;
+    clear: both;
+}
+.image_display{
+    margin: 0 auto;
+    display: flow-root;
+    max-height: 170px;
+}
+.form_display{
+    margin: 3%;
+}
+.form_display > input{
+    cursor: pointer;
+    margin: 0 auto;
+    display: flow-root;
+}
+</style>
+<div class="wrapper">
+{% if folderImages|length == 0 %}
+<h3>Folder has no images.</h3>
+{% endif %}
+{% for image in folderImages %}
+    <div style="width: 30%; height: 250px; margin: 1.5%; float: left; position: relative;">
+        <h4 style="text-align: center;">{{image.id}}</h4>
+        <a href={{image.sourceURL}} target="_blank"><img src={{image.imageURL}} class="image_display"></a>
+        <form action="/delete/image/{{image.id}}/{{foldername}}" method="POST" class="form_display">
+            {{ form.hidden_tag() }}
+            {{ form.delete }}
+        </form>
+    </div>
+{% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block navigation %}
+    {{ super() }}
+{% endblock %}
+

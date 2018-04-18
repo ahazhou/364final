@@ -19,6 +19,7 @@
 <ul style="margin:0;">
 	{% if current_user.is_authenticated %}
 		<li><a href="{{ url_for('logout') }}">Sign Out {{current_user.username}}</a></li>
+		<li><a href="{{ url_for('folders') }}">{{current_user.username}}'s Folders</a></li>
 	{% else %}
 		<li><a href="{{ url_for('login') }}">Sign In</a></li>
 	{% endif %}
