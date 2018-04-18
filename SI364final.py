@@ -89,7 +89,7 @@ class Image(db.Model):
 class SearchHistory(db.Model):
     __tablename__ = "searchhistory"
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
     searchterm = db.Column(db.String(255))
     def __repr__(self):
         return "{%s}" % (self.searchterm)
@@ -121,10 +121,15 @@ class RegisterForm(FlaskForm):
     submit = SubmitField('Register')
     def validate_email(self,field):
         if User.query.filter_by(email=field.data).first():
+            flash('Email already registered')
             raise ValidationError('Email already registered')
     def validate_username(self,field):
         if User.query.filter_by(username=field.data).first():
+            flash('Username taken')
             raise ValidationError('Username taken')
+        if field.data == "Anonymous":
+            flash("Cannot use name: Anonymous")
+            raise ValidationError('Cannot use name: Anonymous')
 
 class FavoriteImageSubmit(FlaskForm):
     submit = SubmitField("Add to Favorites")
@@ -170,6 +175,20 @@ def gettyAPICall(phrase = "", imageID = ""):
         return r.json()
     return None
 
+def get_or_create_searchterm(searchterm, username):
+    if username == None or not current_user.is_authenticated:
+        username = "Anonymous"
+    user_id = User.query.filter_by(username=username).first().id
+    search = SearchHistory.query.filter_by(user_id=user_id, searchterm=searchterm).first()
+    print(user_id)
+    print(searchterm)
+    print("AHHHHHHHHHHHHHHHHHHHHHH\n\n\n\n")
+    if search == None:
+        search = SearchHistory(user_id=user_id, searchterm=searchterm)
+        db.session.add(search)
+        db.session.commit()
+    return search
+
 def get_or_create_image(imageID, search=False):
     image = Image.query.filter_by(imageID = imageID).first()
     if image == None and search == False:
@@ -198,7 +217,7 @@ def image_exists_in_folder(foldername, imageID):
     current_user_id = User.query.filter_by(username=current_user.username).first().id
     current_user_folder = PersonalFolder.query.filter_by(name=foldername, user_id=current_user_id).first()
     current_image = get_or_create_image(imageID, search=True)
-    if current_user_folder == None:
+    if current_user_folder == None or current_image == None:
         return False
     if current_user_folder.image.filter_by(id = current_image.id).first() == None:
         return False
@@ -233,6 +252,7 @@ def index():
 def foundimages():
     searchterm = ""
     if request.args.get("searchterm") != None:
+        get_or_create_searchterm(request.args.get("searchterm"), current_user.username)
         searchterm = request.args.get("searchterm")
     foundimages = gettyAPICall(phrase=searchterm)
     return render_template("foundimages.html", searchterm=searchterm, foundimages=foundimages, form=FavoriteImageSubmit())
@@ -271,8 +291,17 @@ def add_img_to_folder():###TODO
 @app.route('/register',methods=["GET","POST"])
 #register for username
 def register():
+    if current_user.is_authenticated:
+        return ('', 204)
     form = RegisterForm()
     if form.validate_on_submit():
+        if form.password.data != form.confirm.data:
+            flash("Passwords don't match up.")
+            return render_template("register.html", form=form)
+        #CREATE ANONYMOUS USER
+        if User.query.filter_by(username="Anonymous").first() == None:
+            db.session.add(User(username="Anonymous", email="Anonymous", password="Anonymous"))
+            db.session.commit()
         new_user = User(username=form.username.data, email=form.email.data, password=form.password.data)
         db.session.add(new_user)
         db.session.commit()
@@ -302,11 +331,6 @@ def logout():
 @app.route('/liked/<image_id>')
 #all users who liked specific image (get request)
 def liked():
-    pass
-
-@app.route('/createfolder')
-#create folder
-def createfolder():
     pass
 
 @app.route('/userfolders')
