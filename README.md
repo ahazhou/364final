@@ -1,21 +1,21 @@
 ###FULL REQUIREMENTS
 - **Has all setup necessary to run Flask application and runs on port 5000**
 - **User should be able to load route '/'**
-- Include navigation in base.html with href links to all navigatable pages
+- **Include navigation in base.html with href links to all navigatable pages**
 - **All templates inherit from base.html (include at least one additional block)**
 - **Uses user authentication (HW4)**
-- Data associated with a user and at least 2 routes besides "logout" that can only be seen by logged-in users
+- **Data associated with a user and at least 2 routes besides "logout" that can only be seen by logged-in users**
 - **3 model classes besides "User" class**
 - **At least 1 1:many relationship between 2 models**
 - **At least 1 many:many relationship between 2 models**
 - **Successfully save data to each table**
-- Successfully query data from each of your models (must be visible by user)
+- **Successfully query data from each of your models (must be visible by user)**
 - **At least 1 query of all data using .all() which is displayed in a template**
 - **At least 1 query using .filter_by(...)**
 - **At least 1 helper function (besides get_or_create)**
 - **At least 2 get_or_create functions**
-- At least 1 error handler for a 404 error and corresponding template
-- At least one error handler for any other error (like 500) and corresponding template
+- **At least 1 error handler for a 404 error and corresponding template**
+- **At least one error handler for any other error (like 500) and corresponding template**
 - **At least 4 template .html files (besides error templates)**
 - **At least 1 Jinja template for loop**
 - **At least 2 Jinja template conditionals**
@@ -26,7 +26,7 @@
 - **At least 1 POST request to a new page (excluding login/registration)**
 - **At least 2 custom validators excluding log in/auth code**
 - **At least 1 method to update items saved in database**
-- At least 1 method to delete items saved in database
+- **At least 1 method to delete items saved in database**
 - **At least 1 use of "redirect"**
 - **At least 2 uses of "url_for"**
 - **At least 5 view functions**

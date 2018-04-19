@@ -250,7 +250,20 @@ def index():
     form = SearchForm()
     if request.method == 'GET' and request.args.get("searchterm") != None:
         return redirect(url_for('foundimages', searchterm=request.args.get("searchterm")))
-    return render_template("index.html", form=form)
+
+    if current_user.is_authenticated:
+        current_userID = User.query.filter_by(username=current_user.username).first().id
+    else:
+        current_userID = None
+    if current_userID == None:
+        current_userID = User.query.filter_by(username="Anonymous").first().id
+    user_search_history = SearchHistory.query.filter_by(user_id=current_userID).all()
+    recent_saved_images_id = ImageSavedHistory.query.all()
+    recent_saved_images = []
+    for index in recent_saved_images_id:
+        recent_saved_images.append(Image.query.filter_by(imageID=str(index.image_id)).first())
+    print(user_search_history)
+    return render_template("index.html", form=form, user_search_history=user_search_history, recent_saved_images=recent_saved_images)
 
 @app.route('/foundimages')
 #show all of the images from the search result based in the index and be able to add image
@@ -263,8 +276,9 @@ def foundimages():
             current_username = "Anonymous"
         get_or_create_searchterm(request.args.get("searchterm"), current_username)
         searchterm = request.args.get("searchterm")
-    foundimages = gettyAPICall(phrase=searchterm)
-    return render_template("foundimages.html", searchterm=searchterm, foundimages=foundimages, form=FavoriteImageSubmit())
+        foundimages = gettyAPICall(phrase=searchterm)
+        return render_template("foundimages.html", searchterm=searchterm, foundimages=foundimages, form=FavoriteImageSubmit())
+    return redirect(url_for('index'))
 
 @app.route('/addtofavorites/<imageID>/<searchterm>', defaults={'foldername': None},methods=["GET","POST"])
 @app.route('/addtofavorites/<imageID>/<searchterm>/<foldername>',methods=["GET","POST"])
@@ -380,18 +394,6 @@ def delete_object(objecttype,objectname,albumname):
             db.session.commit()
             return redirect(url_for('folders'))
     return ('', 204)
-    
-
-@app.route('/liked/<image_id>')
-#all users who liked specific image (get request)
-def liked():
-    pass
-
-@app.route('/imagehistorysaved')
-#see all images saved
-def savedimages():
-    pass
-
     
 if __name__ == '__main__':
     db.create_all()
