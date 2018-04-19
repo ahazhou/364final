@@ -180,7 +180,15 @@ def gettyAPICall(phrase = "", imageID = ""):
 def get_or_create_searchterm(searchterm, username):
     if username == None or not current_user.is_authenticated:
         username = "Anonymous"
-    user_id = User.query.filter_by(username=username).first().id
+    user_id = User.query.filter_by(username=username).first()
+    if user_id != None:
+        user_id = user_id.id
+    else:#what if there's no anonymous entry in the database?
+        #we create it
+        db.session.add(User(username="Anonymous", email="Anonymous", password="Anonymous"))
+        db.session.commit()
+        user_id = User.query.filter_by(username="Anonymous").first()
+
     search = SearchHistory.query.filter_by(user_id=user_id, searchterm=searchterm).first()
     if search == None:
         search = SearchHistory(user_id=user_id, searchterm=searchterm)
@@ -256,14 +264,17 @@ def index():
     else:
         current_userID = None
     if current_userID == None:
-        current_userID = User.query.filter_by(username="Anonymous").first().id
-    user_search_history = SearchHistory.query.filter_by(user_id=current_userID).all()
-    recent_saved_images_id = ImageSavedHistory.query.all()
-    recent_saved_images = []
-    for index in recent_saved_images_id:
-        recent_saved_images.append(Image.query.filter_by(imageID=str(index.image_id)).first())
-    print(user_search_history)
-    return render_template("index.html", form=form, user_search_history=user_search_history, recent_saved_images=recent_saved_images)
+        current_userID = User.query.filter_by(username="Anonymous").first()
+        if current_userID != None:
+            current_userID = current_userID.id
+            user_search_history = SearchHistory.query.filter_by(user_id=current_userID).all()
+            recent_saved_images_id = ImageSavedHistory.query.all()
+            recent_saved_images = []
+            for index in recent_saved_images_id:
+                recent_saved_images.append(Image.query.filter_by(imageID=str(index.image_id)).first())
+            #goes to this if everything's all good
+            return render_template("index.html", form=form, user_search_history=user_search_history, recent_saved_images=recent_saved_images)
+    return render_template("index.html", form=form)
 
 @app.route('/foundimages')
 #show all of the images from the search result based in the index and be able to add image

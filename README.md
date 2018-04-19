@@ -38,5 +38,25 @@
 - Implement user sign-in with OAuth service and include that you need a specific-service account in the README in the same section as the list of modules that must be installed
 ###DESCRIPTION OF APPLICATION
 This application allows users to search for images on the Getty API (http://developers.gettyimages.com/en/trytheapi.html?) and search and save for their favorite photos. Users can see all of the possible images that have been searched (and the users that have saved the specific images) as well as their search history (by search term) and folders that they have created for each specific photos (they can save photos to various folders). Users can search for other users and see their search history. (Essentially something like Imgur except the users don't upload any photos.)
+###APPLICATION USAGE
+- While not logged in, you can only access the home page as well as the page that displays the results of your search
+- Putting in a search term and clicking enter shows the top 50 images given by the Getty API
+- On the home page, it shows the current user's search history as well as recently saved images by the community
+- Since lots of the web pages cannot be directly accessed, there's only a few navigatable routes
+- After searching for a term, you are presented a page that shows the picture's name, the picture itself (when clicked on, directs you to the picture's source), as well as a button to add to your favorites
+- While not being logged in, you will be directed to a log in page
+- On the add to favorites page (that is not directly accessible), you create a new folder by clicking on the create button, which then creates the folder for you
+- To add an image to a folder, you click on the folder itself. Each specific image can only be added to a folder once.
+- While being logged in, on the navigation links, a new link will pop up: "[INSERT USERNAME]'s Folders" that show you all of the folders that the user has created
+- On the user's folders page, you can delete the folder by clicking delete or look at the images by clicking on the folders themselves.
+- After clicking on the folder, you will be able to see all of the images that the user added as well as the option to delete the image.
 ###MODULES INSTALLED WITH PIP
+- Everything used during class
 ###ROUTES (AND THEIR RESPECTIVE HTML PAGES OR WHAT IT DOES)
+/ => /index
+- Redirects to the index route because they shouldn't be separate
+/index => index.html
+- Can search for image
+- Shows user search history
+- Shows any image anyone added to a folder
+- 
