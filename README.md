@@ -32,7 +32,7 @@
 - **At least 5 view functions**
 ###EXTRA CREDIT REQUIREMENTS
 - **Include AJAX request that accesses and displays useful data**
-- Create, run, and commit at least one migration
+- **Create, run, and commit at least one migration**
 - Include file upload in your application and save/use results of the file
 - Deploy application to Internet or Heroku: (INSERT URL HERE)
 - Implement user sign-in with OAuth service and include that you need a specific-service account in the README in the same section as the list of modules that must be installed
