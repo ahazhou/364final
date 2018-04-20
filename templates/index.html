@@ -11,9 +11,9 @@
 	{{ form.submit() }}
 </form>
 {% if current_user.is_authenticated %}
-<h3>{{current_user.username}}'s Search History:</h3>
+<h3>{{current_user.username}}'s Searches with Added Images:</h3>
 {% else %}
-<h3>Public Search History</h3>
+<h3>Public Searches with Added Images</h3>
 {% endif %}
 {% for value in user_search_history %}
 <p>- {{value.searchterm}}</p>

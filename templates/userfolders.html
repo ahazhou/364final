@@ -31,24 +31,41 @@ textarea:focus, input:focus{
     -webkit-transition-duration: 0.3s;
     transition-duration: 0.3s;  
 }
+.hover{
+    -webkit-transition-duration: 0.3s;
+    transition-duration: 0.3s; 
+}
+.hover:hover{
+    filter: saturate(20%);
+    -webkit-filter: saturate(20%); /* Safari 6.0 - 9.0 */
+    -webkit-transition-duration: 0.3s;
+    transition-duration: 0.3s; 
+}
 </style>
 {% if user_folders|length > 0 %}
 <div class="wrapper">
-    {% for folder in user_folders %}
-    <div style="float: left;">
+    {% for folder in user_folders|sort(attribute='id') %}
+    <div style="float: left;position:relative;width:130px;">
         <a href="{{url_for('open_folder', foldername=folder.name)}}" style="color:black;">
             <div style="width:50px;height:50px;position:relative;margin: 5px 40px;" class="animate">
-                <h3 style="margin:auto; left:50%;top:50%; transform:translate(-50%); position: absolute;">{{folder.name}}</h3>
                 <img src="https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678084-folder-512.png" style="width:50px;margin:0;">
             </div>
         </a>
+        <form action="/userfolders/{{folder.name}}" method="POST" class="form_display">
+            {{ update.hidden_tag() }}
+            {{ update.foldername(style="width:100%;margin-bottom:5px;cursor:default;text-align:center;", value=folder.name)}}
+            {{ update.update(style="margin:0;float:left;width:60px;background:blue;color:white;border:0;height:20px;", class="hover") }}
+        </form>
         <form action="/delete/folder/{{folder.name}}/{{folder.name}}" method="POST" class="form_display">
             {{ form.hidden_tag() }}
-            {{ form.delete }}
+            {{ form.delete(style="margin:0;float:right;width:60px;background:red;color:white;border:0;height:20px;", class="hover") }}
         </form>
     </div>
     {% endfor %}
 </div>
+{% for message in get_flashed_messages() %}
+<h3 style="color:red;">{{ message }}</h3>
+{% endfor %}
 {% else %}
 <h3>No Folders Found.</h3>
 {% endif %}

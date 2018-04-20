@@ -15,14 +15,14 @@
                 },
             success: function (data) { 
                 var returnstring = "Added to " + foldername.value.split('+')[0] + ".";
+                $("#folder_message").css("color", "green")
                 if (data == "exists"){
                     returnstring = "Image already exists in " + foldername.value.split('+')[0] + ".";
+                    $("#folder_message").css("color", "red")
                 }
-                var idname = "#" + foldername.value.split('+')[0]
-                console.log(idname)
-                $(idname).fadeIn(100)
-                $(idname).html(returnstring)
-                $(idname).delay(700).fadeOut(400)
+                $("#folder_message").fadeIn(100)
+                $("#folder_message").html(returnstring)
+                $("#folder_message").delay(700).fadeOut(400)
             },
             error: function (xhf){
                 console.log(xhf)
@@ -41,14 +41,13 @@ textarea:focus, input:focus{
     clear: both;
 }
 .wrapper{
-    margin-bottom:200px;
+    position: relative;
 }
 </style>
 {% if user_folders|length > 0 %}
-<div class="wrapper">
-    {% for folder in user_folders %}
-    <div style="float: left;">
-            <h3 id="{{folder.name}}" style="margin:5px;position:absolute;background:white;top:10px;left:250px;"></h3>
+<div class="wrapper" style="margin-bottom:200px;">
+    {% for folder in user_folders|sort(attribute='id') %}
+    <div style="float: left;" class="wrapper">
             <div style="width:50px;height:50px;position:relative;margin: 5px 40px;">
                 <input onclick="add_to_folder(this);" style="background:transparent;border:none;font-size:0;color:transparent;position:absolute;width:100%;height:100%;cursor:pointer;z-index:1;" value="{{folder.name}}+{{imageID}}">
                     <h3 style="margin:auto; left:50%;top:50%; transform:translate(-50%); position: absolute;">{{folder.name}}</h3>
@@ -57,6 +56,7 @@ textarea:focus, input:focus{
             </div>
     </div>
     {% endfor %}
+    <h3 id="folder_message" style="position:absolute; bottom:-150px;"></h3>
 </div>
 {% endif %}
 <h3>Create New Folder</h3>

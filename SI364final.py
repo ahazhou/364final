@@ -137,6 +137,7 @@ class FavoriteImageSubmit(FlaskForm):
 class CreateNewFolder(FlaskForm):
     foldername = StringField("Folder name:", validators=[Required()])
     submit = SubmitField("Create")
+    update = SubmitField("Update")
     def validate(self):
         rv = FlaskForm.validate(self)
         if not rv:
@@ -213,9 +214,9 @@ def get_or_create_folder_collection(foldername, imageID=-1):
         db.session.add(current_user_folder)
         db.session.commit()
         return current_user_folder
-    if imageID == -1:
-        return None
     #otherwise if the folder already exists
+    if imageID == -1:#if not given, we return the current_folder
+        return current_user_folder
     current_image = get_or_create_image(imageID)
     #add image to current folder
     current_user_folder.image.append(current_image)
@@ -225,6 +226,13 @@ def get_or_create_folder_collection(foldername, imageID=-1):
     db.session.add(imageSavedHistory)
     db.session.commit()
     return current_user_folder
+
+def folder_exists(foldername):
+    current_user_id = User.query.filter_by(username=current_user.username).first().id
+    current_user_folder = PersonalFolder.query.filter_by(name=foldername, user_id=current_user_id).first()
+    if current_user_folder == None:
+        return False
+    return True
 
 def image_exists_in_folder(foldername, imageID):
     current_user_id = User.query.filter_by(username=current_user.username).first().id
@@ -362,16 +370,26 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-@app.route('/userfolders')
+@app.route('/userfolders', defaults={'foldername': None},methods=["GET","POST"])
+@app.route('/userfolders/<foldername>',methods=["GET","POST"])
 #define all folders for specific user (post request)
-def folders():
+def folders(foldername):
+    update = CreateNewFolder()
+    if update.validate_on_submit():
+        if update.foldername.data != foldername:
+            if folder_exists(update.foldername.data):
+                flash("Foldername exists.")
+            else:
+                current_folder = get_or_create_folder_collection(foldername)
+                current_folder.name = update.foldername.data
+                db.session.commit()
     if not current_user.is_authenticated:
         return ('', 204)
     user_id = User.query.filter_by(username=current_user.username).first().id
     if user_id == None:
         return redirect(url_for("register"))
     user_folders = PersonalFolder.query.filter_by(user_id=user_id).all()#get all the folder names
-    return render_template("userfolders.html", user_folders=user_folders, form=DeleteObject())
+    return render_template("userfolders.html", user_folders=user_folders, form=DeleteObject(), update=update)
 
 @app.route('/folder',methods=["GET","POST"])
 #all search terms
