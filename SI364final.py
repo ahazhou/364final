@@ -18,7 +18,7 @@ app.config['SECRET_KEY'] = 'SI364FinalHardToGuessSecretKey'
 
 #DB Creation Setup
 #createdb -U postgres shelldb_example
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:arnoldzhoumi14@localhost/SI364projectplanahzhou"
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:arnoldzhoumi14@localhost/SI364finalahzhou"
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
